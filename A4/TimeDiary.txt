@@ -1,0 +1,17 @@
+Game Choice: I chose to make this game because I thought it was a fun and simple way to understand how games using 
+coordinate systems can be programmed in terms of user interface and data storage, and how computer prediction can 
+can be implemented at a basic level. Given the different modes the game's form can take, I was also curious how this
+would affect computer prediction, would there need to be different versions of computer prediction at each 
+game mode?
+
+November 9, 2020: 2 hours - Deciding what game to program, what game modes to include, what kind of players to include 
+to include in the game (PvP, PvE), what kind of user interface (UI) to have at the menu and at each round. Then, researching what 
+all these areas of the game would need to include in their design prior to programming (i.e. what they would need to have to 
+be able to accurately portray the game, and their corresponding modes).
+
+Source(s) found: https://www.hasbro.com/common/instruct/BattleshipAdvancedMission.pdf, https://en.wikipedia.org/wiki/Battleship_(game)#cite_note-hinebaugh-2,
+https://www.thesprucecrafts.com/the-basic-rules-of-battleship-411069#:~:text=Each%20ship%20must%20be%20placed,ships%20after%20the%20game%20begins. 
+
+November 16, 2020: 
+	6 hours: Implementing user input for game mode, environemnt type and board-size, setting up a "player" class for easier manipulation of player moves and scoring,
+	and constructing a function to display a player determined grid on screen for player's ship placement before/during game play.

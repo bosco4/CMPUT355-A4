@@ -1,0 +1,27 @@
+1.) Group Name: Argo
+
+2.) Members: Bosco Chan (Student #: 1485517)
+
+3.) Contribution: I did all the planning and programming for this project.
+
+4.) Used Code(?): [...], GitHub: https://github.com/bosco4/CMPUT355-A4
+
+5.) Chosen Game: BattleShip
+Description: It is a game where 2 players place 5 battle ships on a grid (with each ship 
+consuming a different number of spaces on the grid), and then attacking each other's battle ships by alternating turns to guess 
+a coordinate on the grid (simulating missles being fired at that grid position) as to where their opponent's battle ships could be 
+at an attempt to sink a battle ship. The winner is determined when a player has destroyed all of their opponent's battleships.
+Best Explanation: https://en.wikipedia.org/wiki/Battleship_(game)#:~:text=It%20is%20played%20on%20an,on%20numerous%20social%20networking%20services.
+
+6.) Original Goals: Implement Player vs Player (PvP), Player vs Environment/Computer (PvE), and different versions of battle ship 
+such as Classic, Salvo, RealTime. For PvP the goal is to just have a running version of the game where each player shares a computer, 
+places their ships in secret, and attacks each other through the grid system. For placing of the ships, and attacking, each player 
+should be able to see two grids; a grid containing their own battle ships (showing ONLY the condition of the ships, i.e. which have parts haven been attacked), 
+and a grid containing launched attacks to their opponents (showing only "successful attacks" and "missed attacks"). For PvE the goal is to have the 
+same gaming system implemented in PvP, but with the goal of having three difficulties (easy, normal, hard). The computer
+difficulty should be dictated by having the computer increasingly be better at guessing ship coordinates (getting closer and closer
+to human guessing ?). 
+Finished Goals:
+Missed Goals:
+
+7.) Performance data: 
