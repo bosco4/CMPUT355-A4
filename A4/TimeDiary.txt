@@ -1,17 +1,35 @@
 Game Choice: I chose to make this game because I thought it was a fun and simple way to understand how games using 
-coordinate systems can be programmed in terms of user interface and data storage, and how computer prediction can 
-can be implemented at a basic level. Given the different modes the game's form can take, I was also curious how this
-would affect computer prediction, would there need to be different versions of computer prediction at each 
-game mode?
+coordinate systems can be programmed in terms of user interface and data storage (e.g. grid position changes), 
+and how computer prediction can be implemented at a basic level. Given the different modes the game's form can take, 
+I was also curious how this would affect computer prediction, would there need to be different versions of computer 
+prediction at each game mode?
 
-November 9, 2020: 2 hours - Deciding what game to program, what game modes to include, what kind of players to include 
-to include in the game (PvP, PvE), what kind of user interface (UI) to have at the menu and at each round. Then, researching what 
-all these areas of the game would need to include in their design prior to programming (i.e. what they would need to have to 
-be able to accurately portray the game, and their corresponding modes).
+November 9, 2020: 
+
+	2 hours - Deciding what game to program, what game modes to include, what kind of players to include 
+	to include in the game (PvP, PvE), what kind of user interface (UI) to have at the menu and at each round. Then, researching what 
+	all these areas of the game would need to include in their design prior to programming (i.e. what they would need to have to 
+	be able to accurately portray the game, and their corresponding modes).
 
 Source(s) found: https://www.hasbro.com/common/instruct/BattleshipAdvancedMission.pdf, https://en.wikipedia.org/wiki/Battleship_(game)#cite_note-hinebaugh-2,
 https://www.thesprucecrafts.com/the-basic-rules-of-battleship-411069#:~:text=Each%20ship%20must%20be%20placed,ships%20after%20the%20game%20begins. 
 
 November 16, 2020: 
-	6 hours: Implementing user input for game mode, environemnt type and board-size, setting up a "player" class for easier manipulation of player moves and scoring,
-	and constructing a function to display a player determined grid on screen for player's ship placement before/during game play.
+
+	5.5 hours: Implemented user input for game mode, environment type for PvP and setting up a "player" class for easier manipulation of player moves, grid positions, board-size,
+	showGrid() function to display a player's size-determined-grid on screen given a player's ship placement coordinates on their own grid, and solving edge cases 
+	so that inputs have to be correct. Started getShipCoords function (1/3 completed with some code and all planning).
+
+	5 hours: Finished the getShipCoords function where it handles boat placements that are only either horizontal or vertical, but doesn't allow for diagonal placements
+	or placements that are less than or greater than the boat lengths given for each boat. Handled incorrect inputs such as overlapping boat placements as well.
+
+	2.5 hours: Implemented player turn based attack function ( attackCoord() ) in classic mode and its subsequent handling of valid inputs for a attack coordinate, 
+	tweaked getShipCoords() to record a player's ship placement coordinates on their own position grid for future game modes.
+
+November 23, 2020:
+	
+	1.5 hour: Finished classic mode for PvP, ensuring that players can place their ships, attack each other based on turn based inputs, and lastly finished the win 
+	condition for both human players.
+
+	
+	

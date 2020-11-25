@@ -4,7 +4,7 @@
 
 3.) Contribution: I did all the planning and programming for this project.
 
-4.) Used Code(?): [...], GitHub: https://github.com/bosco4/CMPUT355-A4
+4.) Used Code(?): [...], GitHub: https://github.com/bosco4/CMPUT355-A4.git
 
 5.) Chosen Game: BattleShip
 Description: It is a game where 2 players place 5 battle ships on a grid (with each ship 
