@@ -6,26 +6,31 @@ https://www.w3schools.com/python/ref_string_isalnum.asp
 https://www.geeksforgeeks.org/python-check-if-element-exists-in-list-of-lists/
 https://www.geeksforgeeks.org/python-how-to-get-subtraction-of-tuples/
 https://www.kammerl.de/ascii/AsciiSignature.php
+https://www.asciiart.eu/logos/biohazards
+https://www.asciiart.eu/weapons/explosives
+http://www.asciiworld.com/-Death-Co-.html
 '''
 
-import os, sys, numpy as np, time
+import os, sys, numpy as np, random, itertools, copy
 
 ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 clear = lambda: os.system('cls')
 
 class player:
-    def __init__(self, ships, Attacks, Grid, shipPositions, Status):
+    def __init__(self, ships, Attacks, Grid, shipPositions, Status, prevAttacks):
         self.ships = ships
         self.Attacks = Attacks
         self.Grid = Grid
         self.shipPositions = shipPositions
         self.Status = Status
+        self.prevAttacks = prevAttacks
 '''
 ships: list of tuples of (shipName, spacesItTakes)
 Attacks: grid (list of list) containing player attacked coordinates
 Grid: grid (list of list) showing where a player's ships are
 shipPositions: dictionary of [shipName] = list of tuples of ship's coordinates
 Status: describing if a player is a npc or person (npc, player1, player2) = (0, 1, 2) 
+prevAttacks: to keep track of previous npc attacks
 '''
 
 def main():
@@ -50,11 +55,15 @@ Good Luck!
     gModeRequirement = ['classic', 'salvo', 'realtime']
     environmentRequirement = ['pvp', 'pve']
     gMode = input('Please enter a game mode (classic, salvo, realtime), environment type (pvp, pve) and\nboard-size (5 <= board-size <= 26).\n(e.g. \'classic pvp 10\') Game Mode:').lower()
+    if gMode.lower() == 'quit':
+        sys.exit()
     gMode = gMode.split()
 
     # check for incorrect inputs
     while len(gMode) != 3 or gMode[2].isnumeric() == False or int(gMode[2]) > 26 or int(gMode[2]) < 5 or gMode[0] not in gModeRequirement or gMode[1] not in environmentRequirement:
-        gMode = input('Please enter a correct input mentioned above.').lower()
+        gMode = input('Please enter a correct input mentioned above.:').lower()
+        if gMode == 'quit':
+            sys.exit()
         gMode = gMode.split()
     
     # initialize players
@@ -66,16 +75,25 @@ Good Luck!
     attackGrid1 = np.zeros((int(gMode[2]), int(gMode[2])))
     attackGrid2 = np.zeros((int(gMode[2]), int(gMode[2])))
     Status = 2 if gMode[1] == 'pvp' else 0
-    player1 = player(ships, attackGrid1, shipGrid1, shipPositions1, 1) 
-    player2 = player(ships, attackGrid2, shipGrid2, shipPositions2, Status)
+    
+    '''
+    gridSize = len(player.Grid)
+    gridSpaces = list(itertools.product(range(gridSize),range(gridSize)))
+    player.prevAttacks = copy.deepcopy(gridSpaces)
+    '''
+    prevAttacks=list(itertools.product(range(int(gMode[2])),range(int(gMode[2]))))
+    
+    player1 = player(ships, attackGrid1, shipGrid1, shipPositions1, 1, prevAttacks) 
+    player2 = player(ships, attackGrid2, shipGrid2, shipPositions2, Status, prevAttacks)
 
     # initalize game choice
     if gMode[0] == 'classic':
         classic(1, player1, player2)
     elif gMode[0] == 'salvo':
-        print('Mode has not yet been implemented.')
+        classic(2, player1, player2)
     elif gMode[0] == 'realtime':
         print('Mode has not yet been implemented.')
+
 
 def classic(mode, player1, player2):
     planningPhase()
@@ -84,8 +102,7 @@ def classic(mode, player1, player2):
     
     # generate player2 ship coords for PvE or PvP 
     if player2.Status == 0:
-        #genShipCoords
-        pass
+        generateShipCoords(player2)
     else:
         getShipCoords(player2)
         clearScreen()
@@ -109,10 +126,7 @@ def classic(mode, player1, player2):
             break
         
         # player2 attacks
-        if player2.Status == 0:
-            pass
-        else:
-            attackCoord(mode, player2, player1)
+        attackCoord(mode, player2, player1)
         if any(1 in row for row in player1.Grid) == False:
             lose2='''
   _____          __  __ ______    ______      ________ _____      _____  _           __     ________ _____    ___   __          _______ _   _  _____  
@@ -144,40 +158,148 @@ enter a single coordinate to attack your opponent (e.g. A1).
     print(phase)
     clearScreen()
 
+# npc generates its own attack coordinates
+def generateAttackCoords(mode, player):
+    attackCoord = []
+    
+    if mode == 1:
+        coordLength = 1
+    elif mode == 2:
+        coordLength = len(player.shipPositions)
+
+    # check if random attackCoord is valid (not already hit)
+    for i in range(coordLength):
+        while True:
+            coord = random.choice(player.prevAttacks)
+            if player.Attacks[coord[0]][coord[1]] == 0:
+                attackCoord.append(ALPHABET[coord[0]] + str(coord[1]+1))
+                player.prevAttacks.remove(coord)
+                break
+    
+    player2Strike(attackCoord)
+    
+    return attackCoord
+
+def player2Strike(attackCoord):
+    warning = '''
+
+////////////////////////////////////////////////////////////////////
+|       __          __     _____  _   _ _____ _   _  _____         |
+|       \ \        / /\   |  __ \| \ | |_   _| \ | |/ ____|        |
+|        \ \  /\  / /  \  | |__) |  \| | | | |  \| | |  __         |
+|         \ \/  \/ / /\ \ |  _  /| . ` | | | | . ` | | |_ |        |
+|          \  /\  / ____ \| | \ \| |\  |_| |_| |\  | |__| |        |
+|           \/  \/_/    \_\_|  \_\_| \_|_____|_| \_|\_____|        |
+|                                                                  |
+///////////////////////////////////////////////////////////////////
+
+                            uuuuuuu
+                        uu$$$$$$$$$$$uu
+                     uu$$$$$$$$$$$$$$$$$uu
+                    u$$$$$$$$$$$$$$$$$$$$$u
+                   u$$$$$$$$$$$$$$$$$$$$$$$u
+                  u$$$$$$$$$$$$$$$$$$$$$$$$$u
+                  u$$$$$$$$$$$$$$$$$$$$$$$$$u
+                  u$$$$$$"   "$$$"   "$$$$$$u
+                  "$$$$"      u$u       $$$$"
+                   $$$u       u$u       u$$$
+                   $$$u      u$$$u      u$$$
+                    "$$$$uu$$$   $$$uu$$$$"
+                     "$$$$$$$"   "$$$$$$$"
+                       u$$$$$$$u$$$$$$$u
+                        u$"$"$"$"$"$"$u
+            uuu         $$u$ $ $ $ $u$$       uuu
+           u$$$$         $$$$$u$u$u$$$       u$$$$
+            $$$$$uu       "$$$$$$$$$"     uu$$$$$$
+          u$$$$$$$$$$$uu     """""    uuuu$$$$$$$$$$
+          $$$$"""$$$$$$$$$$uuu   uu$$$$$$$$$"""$$$"
+           """      ""$$$$$$$$$$$uu ""$"""
+                    uuuu ""$$$$$$$$$$uuu
+            u$$$uuu$$$$$$$$$uu ""$$$$$$$$$$$uuu$$$
+            $$$$$$$$$$""""           ""$$$$$$$$$$$"
+            "$$$$$"                      ""$$$$""
+                $$$"                         $$$$"
+    
+    Enemy incoming at these coordinate(s), prepare yourself!:'''
+    attackedCoords = '    '
+    for coord in attackCoord:
+        attackedCoords += coord  + ' '
+    attackedCoords += '\n'
+    print(warning)
+    print(attackedCoords)
+    #clearScreen()
+    
+    
 # gets a player to attack a enemy cordinate
 def attackCoord(mode, attacker, reciever):
-    
-    # game mode determines how many attack coordinates
-    if mode == 1 or mode == 3:
-        coordLength = 2
-    elif mode == 2:
-        coordLength = len(attacker.shipPositions.keys())
     alpha = ALPHABET[:len(attacker.Grid)]
     
     # if player is human, ask for attack coordinates
     if attacker.Status > 0:
-        # two player game? (player2.Status == 0|2)
+        # two player game? (player2.Status == 2)
         if reciever.Status > 0:
-            cmd = '''
-       _______ _______       _____ _  ___ 
-    /\|__   __|__   __|/\   / ____| |/ / |
-   /  \  | |     | |  /  \ | |    | ' /| |
-  / /\ \ | |     | | / /\ \| |    |  < | |
- / ____ \| |     | |/ ____ \ |____| . \|_|
-/_/    \_\_|     |_/_/    \_\_____|_|\_(_)
-  
-Player{}, your attack board holds all your previous attacks and your position grid
-holds all your placed ships. 
+            if attacker.Status == 1:
+                cmd = '''
+                
+     _____  _           __     ________ _____  __ 
+    |  __ \| |        /\\\ \   / /  ____|  __ \/_ |
+    | |__) | |       /  \\\ \_/ /| |__  | |__) || |
+    |  ___/| |      / /\ \\\   / |  __| |  _  / | |
+    | |    | |____ / ____ \| |  | |____| | \ \ | |
+    |_|    |______/_/    \_\_|  |______|_|  \_\|_|
+           _______ _______       _____ _  ___ 
+        /\|__   __|__   __|/\   / ____| |/ / |
+       /  \  | |     | |  /  \ | |    | ' /| |
+      / /\ \ | |     | | / /\ \| |    |  < | |
+     / ____ \| |     | |/ ____ \ |____| . \|_|
+    /_/    \_\_|     |_/_/    \_\_____|_|\_(_)
+    
+    Player{}, your attack board holds all your previous attacks and your position grid
+    holds all your placed ships. 
 
-    Are you ready?
+        Are you ready?
+            
+        Press enter to view these boards in private.'''
+                cmd = input(cmd.format(attacker.Status))
+                if cmd.lower() == 'quit':
+                    sys.exit()
+            else:
+                
+                cmd = '''
+                
+     _____  _           __     ________ _____  ___  
+    |  __ \| |        /\\\ \   / /  ____|  __ \|__ \ 
+    | |__) | |       /  \\\ \_/ /| |__  | |__) |  ) |
+    |  ___/| |      / /\ \\\   / |  __| |  _  /  / / 
+    | |    | |____ / ____ \| |  | |____| | \ \ / /_ 
+    |_|    |______/_/    \_\_|  |______|_|  \_\____|
+           _______ _______       _____ _  ___ 
+        /\|__   __|__   __|/\   / ____| |/ / |
+       /  \  | |     | |  /  \ | |    | ' /| |
+      / /\ \ | |     | | / /\ \| |    |  < | |
+     / ____ \| |     | |/ ____ \ |____| . \|_|
+    /_/    \_\_|     |_/_/    \_\_____|_|\_(_)
+    
+    Player{}, your attack board holds all your previous attacks and your position grid
+    holds all your placed ships. 
+
+        Are you ready?
+            
+        Press enter to view these boards in private.'''
+                cmd = input(cmd.format(attacker.Status))
+                if cmd.lower() == 'quit':
+                    sys.exit()
         
-    Press enter to view these boards in private.'''
-            cmd = input(cmd.format(attacker.Status))
-        
+        # player1 attacks always when player2 is a npc
         else:
             
             cmd = '''
-
+ _____  _           __     ________ _____  __ 
+|  __ \| |        /\\\ \   / /  ____|  __ \/_ |
+| |__) | |       /  \\\ \_/ /| |__  | |__) || |
+|  ___/| |      / /\ \\\   / |  __| |  _  / | |
+| |    | |____ / ____ \| |  | |____| | \ \ | |
+|_|    |______/_/    \_\_|  |______|_|  \_\|_|
        _______ _______       _____ _  ___ 
     /\|__   __|__   __|/\   / ____| |/ / |
    /  \  | |     | |  /  \ | |    | ' /| |
@@ -193,14 +315,36 @@ Player{}, attack quickly before the enemy destroys you!'''
         showGrid(attacker.Attacks)
         print('\nPlayer{} Position Board:'.format(attacker.Status))
         showGrid(attacker.Grid)
-        attackCoord = input('\nEnter the coordinate you wish attack:').upper()
-        # validity check
-        while (len(attackCoord) <= coordLength+1) == False or (len(attackCoord) >= coordLength) == False or attackCoord[0] not in alpha or attackCoord[1:].isnumeric() == False or attacker.Attacks[alpha.index(attackCoord[0])][int(attackCoord[1])-1] == 2 or attacker.Attacks[alpha.index(attackCoord[0])][int(attackCoord[1])-1] == 3:
-                attackCoord = input('\nEntered coordinate was not valid, try again:').upper()     
-        # attack coordinates in terms of numpy grid indexes  
-        attackCoord = ( alpha.index(attackCoord[0]), int(attackCoord[1])-1 )
-
-    hitCondition(attacker, attackCoord, reciever)
+        # size of possible coordinate
+        coordLength = len(str(len(attacker.Grid)))+1
+        while True:
+            valid = True
+            if mode == 1:
+                attackCoord = input('\nEnter a valid coordinate you wish attack:').upper().split()
+                if attackCoord[0].lower() == 'quit':
+                    sys.exit()
+                if len(attackCoord) != 1:
+                    valid = False
+            elif mode == 2:
+                attackCoord = input('\nEnter {} valid coordinates you wish attack:'.format(len(attacker.shipPositions))).upper().split()
+                if attackCoord[0].lower() == 'quit':
+                    sys.exit()
+                if len(attackCoord) != len(attacker.shipPositions):
+                    valid = False
+            
+            for coord in attackCoord:
+                if (len(coord) <= coordLength) == False or (len(coord) >= coordLength) == False or coord[0] not in alpha or coord[1:].isnumeric() == False or (int(coord[1:]) >= 1) == False or (int(coord[1:]) <= len(attacker.Grid)) == False or attacker.Attacks[alpha.index(coord[0])][int(coord[1])-1] == 2 or attacker.Attacks[alpha.index(coord[0])][int(coord[1])-1] == 3:
+                    valid = False
+            if valid == True:
+                break
+    
+    # npc generates an attack       
+    else:
+        attackCoord = generateAttackCoords(mode, attacker)
+    
+    for coord in attackCoord:
+        coord = ( alpha.index(coord[0]), int(coord[1])-1 )
+        hitCondition(attacker, coord, reciever)
     clearScreen()
 
 # check if attacked coordinate has hit or miss and add attack to players attack grid
@@ -212,6 +356,21 @@ def hitCondition(attacker, coord, reciever):
  ______ ______  |  __  | | |    | |  | |  ______ ______ 
 |______|______| | |  | |_| |_   | |  |_| |______|______|
                 |_|  |_|_____|  |_|  (_)                
+                
+Asset Destroyed:               
+                             ____
+                     __,-~~/~    `---.
+                   _/_,---(      ,    )
+               __ /        <    /   )  \___
+- ------===;;;'====------------------===;;;===----- -  -
+                  \/  ~"~"~"~"~"~\~"~)~"/
+                  (_ (   \  (     >    \)
+                   \_( _ <         >_>'
+                      ~ `-i' ::>|--"
+                          I;|.|.|
+                         <|i::|i|`.
+                        (` ^'"`-' ")
+---------------------------------------------------------
     '''
     
     miss = '''
@@ -221,6 +380,15 @@ def hitCondition(attacker, coord, reciever):
  ______ ______  | |\/| | | |  \___ \\\___ \| |  ______ ______ 
 |______|______| | |  | |_| |_ ____) |___) |_| |______|______|
                 |_|  |_|_____|_____/_____/(_)                
+                
+Asset is still Active:
+
+                     \|/   __/___            
+                    __|___/______|           
+            _______/_____\_______\_____     
+            \              < < <       |    
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     '''
     
     # input miss or hit values for attacker.Attacks grid
@@ -228,15 +396,27 @@ def hitCondition(attacker, coord, reciever):
         print(hit)
         reciever.Grid[coord[0]][coord[1]] = -1
         attacker.Attacks[coord[0]][coord[1]] = 2
-        coord = str(coord)
         # remove coordinates for an attacked ship and remove ship with no coordinates
         for ship in list(reciever.shipPositions.keys()):
             if coord in reciever.shipPositions[ship]:
                 reciever.shipPositions[ship].remove(coord)
                 # check if ship exists on enemy board after attack
                 if not reciever.shipPositions[ship]:
-                    print('Enemy {} has just been sunk!'.format(ship))
+                    sink ='''
+    ===================================================
+    ====Enemy {} has just been sunk, Good Hit!====
+    ==================================================='''
+                    print(sink.format(ship))
+                    del reciever.shipPositions[ship]
+
     else:
+
+        if attacker.Status == 0:
+            
+            enemyMiss = '''
+Enemy has missed you! Don't celebrate yet, they're still out there....'''
+            print(enemyMiss)
+
         print(miss)
         attacker.Attacks[coord[0]][coord[1]] = 3
 
@@ -264,12 +444,84 @@ position can't be changed.
 
 # npc generates its own random ship coordinates
 def generateShipCoords(player):
-    pass
+    #random.seed(10)
+    player.shipPositions = {'carrier': [(0,1)], 'battleship': [], 'cruiser': [], 'submarine': [], 'destroyer' : []}
+    spacesTaken = []
 
+    # create list(np.array) of player.grid, np.array.dim(gridSize, gridSize)
+    gridSize = len(player.Grid)
+    gridSpaces = list(itertools.product(range(gridSize),range(gridSize)))
+    npArray = np.asarray(gridSpaces, np.dtype('int,int') )
+    npArray = npArray.reshape([gridSize, gridSize])
+    coordGrid = npArray.tolist()
+    coordGridTranspose = np.transpose(npArray).tolist()
+
+    # find all horizontal/vertical placements per ship
+    for ship in player.ships:
+
+        shipSize = ship[1]
+        maxGroup = (gridSize - shipSize) + 1
+        horizontal = []
+        vertical = []
+        allPlacements = []
+        # get all possible placements for a ship
+        for j in range(gridSize):
+            groupT = []
+            group = []
+            for i in range(maxGroup):
+                group.append(coordGrid[j][i:i+shipSize])
+                groupT.append(coordGridTranspose[j][i:i+shipSize])
+            horizontal.extend(group)
+            vertical.extend(groupT)
+
+        # allPlacements points to horizontal, then extends
+        allPlacements = horizontal
+        allPlacements.extend(vertical)
+
+        while True:
+            valid = True
+            index = random.randint(0,len(allPlacements)-1)
+            if any(item in allPlacements[index] for item in spacesTaken):
+                valid = False
+            if valid == True:
+                break
+            
+        spacesTaken.extend(allPlacements[index])
+        
+        for coord in allPlacements[index]:
+            player.Grid[coord[0]][coord[1]] = 1
+        
+        player.shipPositions[ship[0]] = allPlacements[index]  
 
 # get ship coordinates from a player and create their position board
 def getShipCoords(player):
-    print('PLAYER{}, please enter the set of coordinates for each ship within the grid (e.g. carrier, 5-spaces:A1 A5)\nNote: Each set of coordinates given must consume the correct amount of spaces on the grid.\n'.format(player.Status))
+    if player.Status == 1:
+        msg ='''
+ _____  _           __     ________ _____  __ 
+|  __ \| |        /\\\ \   / /  ____|  __ \/_ |
+| |__) | |       /  \\\ \_/ /| |__  | |__) || |
+|  ___/| |      / /\ \\\   / |  __| |  _  / | |
+| |    | |____ / ____ \| |  | |____| | \ \ | |
+|_|    |______/_/    \_\_|  |______|_|  \_\|_|
+
+Please enter the set of coordinates for each ship within the grid (e.g. carrier, 5-spaces:A1 A5)\nNote: Each set of coordinates given must consume the correct amount of spaces on the grid.
+        
+        '''
+    else:
+        msg = '''
+        
+ _____  _           __     ________ _____  ___  
+|  __ \| |        /\\\ \   / /  ____|  __ \|__ \ 
+| |__) | |       /  \\\ \_/ /| |__  | |__) |  ) |
+|  ___/| |      / /\ \\\   / |  __| |  _  /  / / 
+| |    | |____ / ____ \| |  | |____| | \ \ / /_ 
+|_|    |______/_/    \_\_|  |______|_|  \_\____|
+
+Please enter the set of coordinates for each ship within the grid (e.g. carrier, 5-spaces:A1 A5)\nNote: Each set of coordinates given must consume the correct amount of spaces on the grid.
+        
+    '''
+    
+    print(msg)
     showGrid(player.Grid)
     i = 0
     # (row,col) per coord
@@ -280,6 +532,8 @@ def getShipCoords(player):
     spacesTaken = []
     while i < len(player.ships):
         shipCoord = input('\n{} {}-spaces:'.format(player.ships[i][0], player.ships[i][1])).upper().split()
+        if shipCoord[0].lower() == 'quit':
+            sys.exit()
         spacesToBeTaken = []
 
         # check for incorrect inputs
@@ -299,8 +553,9 @@ def getShipCoords(player):
             # horizontal placement
             if subCoords[0] == 0 and abs(subCoords[1])+1 == int(player.ships[i][1]):
                 for col in range(coord1[1]-1, coord2[1]):
-                    spacesToBeTaken.append(''.join(str((coord1[0],col))))
-                
+                    #spacesToBeTaken.append(''.join(str((coord1[0],col))))
+                    spacesToBeTaken.append((coord1[0],col))
+                    
                 # add ship placement coordinate to player's grid, and ship position dictionary
                 if any(item in spacesToBeTaken for item in spacesTaken) == False:
                     for col in range(coord1[1]-1, coord2[1]):    
@@ -314,8 +569,9 @@ def getShipCoords(player):
             # vertical placement
             elif subCoords[1] == 0 and abs(subCoords[0])+1 == int(player.ships[i][1]):
                 for row in range(coord1[0], coord2[0]+1):
-                    spacesToBeTaken.append(''.join(str((row, coord1[1]-1))))
-
+                    #spacesToBeTaken.append(''.join(str((row, coord1[1]-1))))
+                    spacesToBeTaken.append((row, coord1[1]-1))
+                    
                 # add ship placement coordinate to player's grid, and ship position dictionary
                 if any(item in spacesToBeTaken for item in spacesTaken) == False:
                     for row in range(coord1[0], coord2[0]+1):
@@ -391,8 +647,11 @@ def showGrid(grid):
             print(separater)
    
 def clearScreen():
-    user = input('\nPress enter to clear screen.')
-    clear() 
+    user = input('\nPress enter to clear screen/continue.')
+    if user.lower() == 'quit':
+        sys.exit()
+    else:
+        clear() 
     
 if __name__ == "__main__":
     main()
